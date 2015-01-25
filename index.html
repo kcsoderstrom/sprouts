@@ -1,0 +1,133 @@
+<html>
+<head>
+	<script src="jquery-2.1.1.min.js"></script>
+	<title>Sprouts</title>
+</head>
+<body>
+	<canvas id="sprouts-canvas"></canvas>
+
+	<style>
+		body, html, div, canvas {
+			margin: 0;
+			padding: 0;
+			border: 0;
+			font: inherit;
+		}
+
+		.sprout {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: #98FF90;
+		}
+
+		.selected {
+			background: black;
+		}
+
+		.double-selected {
+			background: white;
+		}
+
+		.runner {
+			border: 2px solid black;
+			border-radius: 50%;
+			position: absolute;
+		}
+
+		canvas {
+			background: #FAA669;
+		}
+	</style>
+
+	<script>
+		$(function() {
+			var canv = document.getElementById("sprouts-canvas");
+			canv.height = window.innerHeight;
+			canv.width = window.innerWidth;
+			var ctx = canv.getContext("2d");
+
+			$(window).on("resize", function(event) {
+				canv.height = window.innerHeight;
+				canv.width = window.innerWidth;
+			});
+
+			var $selected1;
+			var $selected2;
+			var sprouts = [{"x": 20, "y": 100, "radius": 30}, {"x": 400, "y": 300, "radius": 40}];
+
+			var clearSelected = function() {
+				clearSelected1();
+				clearSelected2();
+			};
+
+			var clearSelected1 = function() {
+				$selected1.removeClass("selected double-selected");
+				$selected1 = null;
+			};
+
+			var clearSelected2 = function() {
+				$selected2.removeClass("selected double-selected");
+				$selected2 = null;
+			}
+
+			var iterateSelect = function($sprout) {
+				if($sprout.hasClass("double-selected")) {
+					clearSelected();
+				} else if($sprout.hasClass("selected")) {
+					$sprout.addClass("double-selected");
+					$selected2 = $sprout;
+				} else {
+					$sprout.addClass("selected")
+					$selected1 ? $selected2 = $sprout : $selected1 = $sprout;
+				}
+			};
+
+			$(canv).on("click", function(event) {
+				var impacted = impactedSprout(event);
+				if(impacted) {
+					iterateSelect(impacted);
+				} else {
+					clearSelected();
+				}
+
+				// you also need to cover the case where you have two things selected.
+			});
+
+			var impactedSprout = function(event) {
+				var x = event.pageX;
+				var y = event.pageY;
+				var impacted;
+				sprouts.forEach(function(sprout) {
+					if(distance([sprout.x, sprout.y], [x, y]) < sprout.radius) {
+						impacted = sprout;
+					}
+				});
+
+				return impacted;
+			};
+
+			var distance = function(p1, p2) {
+				return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+			};
+
+			$(document).on("mousemove", function(event) {
+				if($selected1 && $selected2) {
+					$("body").append('<div class="runner">');
+					$("div.runner").last().css({"height": "50px", "width": "50px"});
+					// this is where you need to make a circle ok
+				}
+			});
+
+			setInterval(function() {
+				game.run();
+				game.draw();
+			}, 100);
+
+			var draw = function() {
+
+			};
+		}());
+	</script>
+</body>
+</html>
